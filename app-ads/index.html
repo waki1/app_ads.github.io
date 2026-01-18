@@ -1,1 +1,295 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画像回転ツール - 向きを一瞬で修正</title>
+    <meta name="description" content="大量の画像の向きを一瞬で修正。一括回転で写真整理の時間を大幅に短縮するiOSアプリ。">
+    <style>
+        :root {
+            --primary: #0A84FF;
+            --secondary: #5E5CE6;
+            --background: #000000;
+            --surface: #1C1C1E;
+            --text-main: #FFFFFF;
+            --text-secondary: #8E8E93;
+            --gradient: linear-gradient(135deg, #0A84FF 0%, #5E5CE6 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Utility */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .gradient-text {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 70%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .hero-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .hero-image {
+            margin-top: 4rem;
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transform: rotate(-5deg);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: rotate(-5deg) translateY(0px); }
+            50% { transform: rotate(-5deg) translateY(-20px); }
+            100% { transform: rotate(-5deg) translateY(0px); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background-color: var(--surface);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+        }
+
+        /* Marketing / Copy Section */
+        .marketing {
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .marketing h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .step-item {
+            max-width: 200px;
+        }
+
+        .step-number {
+            font-size: 4rem;
+            font-weight: 800;
+            opacity: 0.2;
+            margin-bottom: -2rem;
+            position: relative;
+            z-index: 0;
+        }
+
+        .step-text {
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero-image { max-width: 250px; }
+            .steps { gap: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="gradient-text">写真の向きを、<br>一瞬で整える。</h1>
+            <p>大量の写真もワンタップで一括回転。<br>写真整理のストレスから解放されましょう。</p>
+            
+            <a href="https://apps.apple.com/us/app/id6754210727" class="hero-badge" target="_blank">
+                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp?size=250x83&amp;releaseDate=1700000000" alt="Download on the App Store" style="height: 60px;">
+            </a>
+
+            <!-- Abstract Phone Mockup using simple CSS Shapes or placeholder -->
+            <div style="margin-top: 60px; position: relative;">
+                 <!-- This is a placeholder for the app screenshot. In a real scenario, we'd use a real asset. -->
+                 <div style="width: 200px; height: 400px; background: #2c2c2e; border-radius: 30px; border: 8px solid #4a4a4a; display: flex; align-items: center; justify-content: center; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); margin: 0 auto; overflow: hidden;">
+                    <div style="text-align: center; opacity: 0.5;">
+                        <div style="font-size: 40px;">↻</div>
+                        <div style="font-size: 14px; margin-top: 10px;">Image Rotator</div>
+                    </div>
+                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">選ばれる3つの理由</h2>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-icon">⚡️</div>
+                    <h3>超高速・一括回転</h3>
+                    <p>1枚ずつの編集はもう不要。数百枚の写真も選択してワンタップで回転できます。驚くほどの時短を実現。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <h3>直感的な操作</h3>
+                    <p>写真を選んで、回転ボタンを押すだけ。余計な機能は一切なし。誰でもすぐに使えるシンプル設計。</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🔒</div>
+                    <h3>安心のプライバシー</h3>
+                    <p>画像の処理はすべて端末内で完結。大切な写真が外部サーバーに送信されることはありません。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Marketing / Usage Flow -->
+    <section class="marketing">
+        <div class="container">
+            <h2>使い方はとてもシンプル</h2>
+            <div class="steps">
+                <div class="step-item">
+                    <div class="step-number">01</div>
+                    <div class="step-text">写真を選択</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">02</div>
+                    <div class="step-text">回転方向を指定</div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">03</div>
+                    <div class="step-text">保存完了</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Image Rotator Tool. All rights reserved.</p>
+            <p style="margin-top: 10px; font-size: 0.8rem;">
+                <a href="https://apps.apple.com/us/app/id6754210727" target="_blank">App Storeで見る</a>
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
 
