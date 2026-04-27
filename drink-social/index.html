@@ -1,370 +1,255 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alco Aide (アルコエイド) - 健康的な飲酒習慣をサポート</title>
-    <meta name="description" content="日々の飲酒量を記録し、健康的な飲酒習慣をサポートするアプリ。飲み過ぎ防止のアラート機能付き。">
-    <style>
-        :root {
-            --primary: #FF9500;
-            --secondary: #FF3B30;
-            --background: #000000;
-            --surface: #1C1C1E;
-            --text-main: #FFFFFF;
-            --text-secondary: #8E8E93;
-            --gradient: linear-gradient(135deg, #FF9500 0%, #FF3B30 100%);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>アルコエイド - 飲酒記録で飲み過ぎ防止</title>
+  <meta name="description" content="アルコエイドは、飲んだお酒をかんたんに記録し、カレンダー・お気に入り・酒場メモ・セーフティ通知で飲みすぎ防止をサポートするiPhoneアプリです。" />
+  <style>
+    :root {
+      --app-bg: #f3f4f8;
+      --card: #ffffff;
+      --text: #070707;
+      --muted: #8a8a91;
+      --line: rgba(0,0,0,.08);
+      --blue: #3478f6;
+      --blue-2: #149cff;
+      --shadow: 0 24px 70px rgba(20, 24, 35, .12);
+      --shadow-card: 0 14px 34px rgba(20, 24, 35, .09);
+      --radius-xl: 34px;
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans JP", sans-serif;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
-        }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(circle at 90% 8%, rgba(52,120,246,.16), transparent 30rem),
+        radial-gradient(circle at 8% 18%, rgba(255,255,255,.92), transparent 28rem),
+        linear-gradient(180deg, #f7f8fb 0%, var(--app-bg) 48%, #f7f8fb 100%);
+      overflow-x: hidden;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--background);
-            color: var(--text-main);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
 
-        /* Typography */
-        h1,
-        h2,
-        h3 {
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(243,244,248,.78);
+      border-bottom: 1px solid rgba(0,0,0,.04);
+      backdrop-filter: blur(22px);
+    }
+    .nav-inner { height: 72px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; letter-spacing: -.04em; }
+    .brand-mark { width: 42px; height: 42px; border-radius: 16px; display: grid; place-items: center; background: #fff; box-shadow: var(--shadow-card); }
+    .nav-links { display: flex; align-items: center; gap: 24px; color: #555861; font-weight: 800; font-size: 14px; }
+    .nav-cta { padding: 12px 18px; border-radius: 999px; color: #fff; background: var(--blue); box-shadow: 0 14px 30px rgba(52,120,246,.25); }
 
-        /* Utility */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+    .hero { padding: 82px 0 72px; }
+    .hero-grid { display: grid; grid-template-columns: 1.04fr .96fr; gap: 54px; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding: 10px 15px; border-radius: 999px; background: #fff; color: var(--blue); box-shadow: var(--shadow-card); font-size: 13px; font-weight: 900; }
+    h1 { margin: 24px 0 18px; font-size: clamp(46px, 7vw, 82px); line-height: 1.02; letter-spacing: -.075em; }
+    .lead { max-width: 570px; margin: 0; color: #74757c; font-size: 19px; font-weight: 700; line-height: 1.9; letter-spacing: -.015em; }
+    .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 34px; }
+    .appstore { display: inline-flex; align-items: center; gap: 12px; padding: 15px 22px; border-radius: 18px; background: #050505; color: #fff; box-shadow: 0 18px 40px rgba(0,0,0,.18); font-weight: 900; }
+    .appstore .apple { font-size: 28px; line-height: 1; }
+    .appstore small { display: block; font-size: 11px; opacity: .75; font-weight: 700; }
+    .appstore b { display: block; font-size: 18px; letter-spacing: -.02em; }
+    .ghost-btn { display: inline-flex; align-items: center; padding: 16px 19px; border-radius: 18px; background: #fff; font-weight: 900; box-shadow: var(--shadow-card); }
+    .note { margin-top: 20px; color: #8b8c92; font-size: 13px; }
 
-        .gradient-text {
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .phone-stage { min-height: 670px; position: relative; display: grid; place-items: center; }
+    .orb { position: absolute; width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(52,120,246,.18), transparent 70%); filter: blur(2px); }
+    .phone { width: min(342px, 84vw); height: 684px; padding: 12px; border-radius: 58px; background: #050505; box-shadow: 0 34px 90px rgba(0,0,0,.24); position: relative; transform: rotate(1.5deg); }
+    .phone::before { content: ""; position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 118px; height: 32px; border-radius: 999px; background: #050505; z-index: 2; }
+    .phone-screen { height: 100%; border-radius: 47px; overflow: hidden; background: var(--app-bg); position: relative; }
+    .status { height: 62px; display: flex; align-items: end; justify-content: space-between; padding: 0 30px 8px; font-size: 15px; font-weight: 900; }
+    .app-shot { padding: 34px 22px 94px; }
+    .app-shot h3 { margin: 0 0 26px; font-size: 30px; line-height: 1.15; letter-spacing: -.06em; }
+    .label { color: #8b8b91; font-weight: 900; margin-bottom: 14px; }
+    .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .drink-tile { height: 116px; border-radius: 28px; background: #fff; box-shadow: var(--shadow-card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-weight: 900; }
+    .drink-icon { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: #fff3d8; font-size: 26px; }
+    .bottom-nav { position: absolute; left: 17px; right: 17px; bottom: 18px; height: 76px; border-radius: 999px; background: rgba(255,255,255,.92); display: grid; grid-template-columns: repeat(5,1fr); align-items: center; box-shadow: 0 18px 40px rgba(0,0,0,.12); }
+    .tab { text-align: center; font-size: 10px; font-weight: 900; color: #111; }
+    .tab span { display: block; font-size: 22px; margin-bottom: 3px; }
+    .tab.active { color: var(--blue); background: rgba(52,120,246,.1); border-radius: 999px; padding: 9px 0; margin: 0 3px; }
 
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            background: radial-gradient(circle at center, #2e1a1a 0%, #000000 70%);
-            padding-top: 60px;
-            padding-bottom: 60px;
-        }
+    .floating-panel { position: absolute; background: rgba(255,255,255,.88); backdrop-filter: blur(18px); box-shadow: var(--shadow); border-radius: 26px; padding: 18px 20px; font-weight: 900; }
+    .floating-panel small { display: block; color: #8b8b91; margin-top: 4px; }
+    .float-left { left: 2%; top: 19%; }
+    .float-right { right: -2%; bottom: 18%; }
 
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.1;
-        }
+    section { padding: 86px 0; }
+    .section-head { text-align: center; max-width: 740px; margin: 0 auto 44px; }
+    .section-head h2 { margin: 0 0 14px; font-size: clamp(34px, 5vw, 58px); line-height: 1.08; letter-spacing: -.07em; }
+    .section-head p { margin: 0; color: #7e7f86; font-size: 17px; line-height: 1.85; font-weight: 700; }
 
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--text-secondary);
-            margin-bottom: 3rem;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature-card { padding: 30px; min-height: 230px; border-radius: var(--radius-xl); background: #fff; box-shadow: var(--shadow-card); }
+    .feature-icon { width: 62px; height: 62px; border-radius: 22px; display: grid; place-items: center; background: #eef4ff; color: var(--blue); font-size: 30px; margin-bottom: 18px; }
+    .feature-card h3 { margin: 0 0 10px; font-size: 23px; letter-spacing: -.05em; }
+    .feature-card p { margin: 0; color: #7d7e85; line-height: 1.8; font-weight: 700; }
 
-        .hero-badge {
-            display: inline-block;
-            transition: transform 0.3s ease;
-        }
+    .how-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; counter-reset: step; }
+    .step-card { position: relative; padding: 32px; border-radius: var(--radius-xl); background: #fff; box-shadow: var(--shadow-card); min-height: 210px; }
+    .step-card::before { counter-increment: step; content: "0" counter(step); position: absolute; right: 24px; top: 18px; color: rgba(52,120,246,.16); font-size: 58px; font-weight: 900; letter-spacing: -.08em; }
+    .step-card h3 { font-size: 24px; margin: 56px 0 10px; letter-spacing: -.05em; }
+    .step-card p { color: #7d7e85; line-height: 1.8; font-weight: 700; margin: 0; }
 
-        .hero-badge:hover {
-            transform: scale(1.05);
-        }
+    .cta-box { border-radius: 42px; padding: 60px; color: #fff; background: linear-gradient(135deg, #2550a6, #3478f6 48%, #149cff); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+    .cta-box::after { content:""; position:absolute; right:-80px; top:-100px; width:340px; height:340px; border-radius:50%; background:rgba(255,255,255,.18); }
+    .cta-box h2 { position:relative; z-index:1; max-width: 650px; margin:0 0 14px; font-size: clamp(36px, 5vw, 62px); line-height:1.08; letter-spacing:-.075em; }
+    .cta-box p { position:relative; z-index:1; max-width: 620px; color:#e8f1ff; font-weight:700; line-height:1.8; }
+    .cta-box .hero-actions { position:relative; z-index:1; }
 
-        /* Features Section */
-        .features {
-            padding: 100px 0;
-            background-color: var(--surface);
-        }
+    footer { padding: 32px 0 44px; color: #87888f; font-size: 13px; font-weight: 700; }
+    .footer-inner { display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; }
 
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 4rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 2rem;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, background 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .card h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
-        }
-
-        .card p {
-            color: var(--text-secondary);
-        }
-
-        .card ul {
-            list-style: none;
-            margin-top: 1rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .card ul li {
-            margin-bottom: 0.5rem;
-            padding-left: 1.2em;
-            position: relative;
-        }
-
-        .card ul li::before {
-            content: "•";
-            color: var(--primary);
-            position: absolute;
-            left: 0;
-        }
-
-        /* Marketing / Copy Section */
-        .marketing {
-            padding: 100px 0;
-            text-align: center;
-        }
-
-        .marketing h2 {
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .steps {
-            display: flex;
-            justify-content: center;
-            gap: 4rem;
-            margin-top: 3rem;
-            flex-wrap: wrap;
-        }
-
-        .step-item {
-            max-width: 250px;
-            text-align: center;
-        }
-
-        .step-number {
-            font-size: 4rem;
-            font-weight: 800;
-            opacity: 0.2;
-            margin-bottom: -2rem;
-            position: relative;
-            z-index: 0;
-        }
-
-        .step-title {
-            position: relative;
-            z-index: 1;
-            font-weight: 700;
-            font-size: 1.4rem;
-            margin-bottom: 1rem;
-        }
-
-        .step-desc {
-            position: relative;
-            z-index: 1;
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        /* Disclaimer Section */
-        .disclaimer {
-            padding: 40px 0;
-            background-color: #121212;
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .disclaimer ul {
-            list-style: none;
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: left;
-            padding: 0 20px;
-        }
-
-        .disclaimer li {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Footer */
-        footer {
-            padding: 40px 0;
-            text-align: center;
-            color: var(--text-secondary);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        /* Media Queries */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .steps {
-                gap: 2rem;
-            }
-        }
-    </style>
+    @media (max-width: 940px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .feature-grid, .how-grid { grid-template-columns: 1fr 1fr; }
+      .phone-stage { min-height: 640px; }
+      .nav-links a:not(.nav-cta) { display:none; }
+    }
+    @media (max-width: 640px) {
+      .container { width: min(100% - 28px, 1120px); }
+      .hero { padding: 54px 0 40px; }
+      h1 { font-size: 49px; }
+      .lead { font-size: 16px; }
+      .feature-grid, .how-grid { grid-template-columns: 1fr; }
+      .phone { width: 304px; height: 608px; }
+      .phone-stage { min-height: 590px; }
+      .floating-panel { display:none; }
+      .category-grid { gap: 10px; }
+      .drink-tile { height: 100px; border-radius: 24px; }
+      section { padding: 62px 0; }
+      .cta-box { padding: 38px 24px; border-radius: 32px; }
+      .nav-inner { height: 64px; }
+    }
+  </style>
 </head>
-
 <body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#">
+        <span class="brand-mark">🍺</span>
+        <span>アルコエイド</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">機能</a>
+        <a href="#howto">使い方</a>
+        <a class="nav-cta" href="https://apps.apple.com/jp/app/%E3%82%A2%E3%83%AB%E3%82%B3%E3%82%A8%E3%82%A4%E3%83%89-%E9%A3%B2%E9%85%92%E8%A8%98%E9%8C%B2%E3%81%A7%E9%A3%B2%E3%81%BF%E9%81%8E%E3%81%8E%E9%98%B2%E6%AD%A2/id6759056143">App Store</a>
+      </div>
+    </div>
+  </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <h1 class="gradient-text">日々の飲酒量を記録し、<br>健康的な飲酒習慣を。</h1>
-            <p>Alco Aide（アルコエイド）は、お酒の種類や量を手軽に記録し、カレンダーで履歴を管理。<br>飲み過ぎ防止のアラート機能で、無理のない飲酒ライフを提案します。</p>
-
-            <!-- Link placeholder - using a generic structure as no URL was provided -->
-            <!-- 
-            <a href="#" class="hero-badge" target="_blank">
-                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp?size=250x83&amp;releaseDate=1700000000" alt="Download on the App Store" style="height: 60px;">
+  <main>
+    <header class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="badge">📋 飲酒記録で飲みすぎ防止</div>
+          <h1>何を飲んだか、<br />すぐ残せる。</h1>
+          <p class="lead">アルコエイドは、ビール・ハイボール・ワインなどをタップで記録できるiPhoneアプリ。カレンダー、写真のお気に入り、酒場メモ、セーフティ通知まで、飲酒習慣をサポートします。</p>
+          <div class="hero-actions">
+            <a class="appstore" href="https://apps.apple.com/jp/app/%E3%82%A2%E3%83%AB%E3%82%B3%E3%82%A8%E3%82%A4%E3%83%89-%E9%A3%B2%E9%85%92%E8%A8%98%E9%8C%B2%E3%81%A7%E9%A3%B2%E3%81%BF%E9%81%8E%E3%81%8E%E9%98%B2%E6%AD%A2/id6759056143">
+              <span class="apple"></span>
+              <span><small>Download on the</small><b>App Store</b></span>
             </a>
-            -->
+            <a class="ghost-btn" href="#features">できることを見る →</a>
+          </div>
+          <p class="note">※飲酒は20歳になってから。飲酒量の記録と振り返りをサポートするアプリです。</p>
+        </div>
 
-            <!-- Abstract Phone Mockup -->
-            <div style="margin-top: 60px; position: relative;">
-                <div
-                    style="width: 200px; height: 400px; background: #2c2c2e; border-radius: 30px; border: 8px solid #4a4a4a; display: flex; align-items: center; justify-content: center; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5); margin: 0 auto; overflow: hidden; flex-direction: column;">
-                    <div style="text-align: center; opacity: 0.8;">
-                        <div style="font-size: 40px;">🍺</div>
-                        <div style="font-size: 18px; margin-top: 10px; font-weight: bold;">Alco Aide</div>
-                    </div>
+        <div class="phone-stage" aria-hidden="true">
+          <div class="orb"></div>
+          <div class="floating-panel float-left">16種類のカテゴリ<small>よく飲むお酒をタップ</small></div>
+          <div class="floating-panel float-right">セーフティ通知<small>飲みすぎ・和らぎ水も</small></div>
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="status"><span>0:03</span><span>••• Wi‑Fi ▰</span></div>
+              <div class="app-shot">
+                <h3>何を飲みますか？</h3>
+                <div class="label">カテゴリー</div>
+                <div class="category-grid">
+                  <div class="drink-tile"><span class="drink-icon">🍺</span>ビール</div>
+                  <div class="drink-tile"><span class="drink-icon">🥃</span>ハイボール</div>
+                  <div class="drink-tile"><span class="drink-icon" style="background:#f6dce7">🍷</span>ワイン</div>
+                  <div class="drink-tile"><span class="drink-icon" style="background:#f4e8df">🥃</span>ウイスキー</div>
+                  <div class="drink-tile"><span class="drink-icon" style="background:#efe9e3">🍸</span>ブランデー</div>
+                  <div class="drink-tile"><span class="drink-icon" style="background:#e1f0e8">🍾</span>ジン</div>
                 </div>
+              </div>
+              <div class="bottom-nav">
+                <div class="tab active"><span>📋</span>記録</div>
+                <div class="tab"><span>▦</span>カレンダー</div>
+                <div class="tab"><span>▣</span>お気に入り</div>
+                <div class="tab"><span>👥</span>酒場メモ</div>
+                <div class="tab"><span>⚙</span>設定</div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+    </header>
+
+    <section id="features">
+      <div class="container">
+        <div class="section-head">
+          <h2>迷わず記録できて、あとから見返せる。</h2>
+          <p>タップで記録、カレンダーで振り返り、通知で飲みすぎに気づける。日常で続けやすい機能だけに絞っています。</p>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card"><div class="feature-icon">🍺</div><h3>タップで飲酒記録</h3><p>ビール、ハイボール、ワイン、ウイスキーなどから選ぶだけ。標準量も表示されるので迷わず記録できます。</p></div>
+          <div class="feature-card"><div class="feature-icon">▦</div><h3>カレンダーで振り返り</h3><p>日ごとの飲酒記録を月表示で確認。上限に対する割合や、その日の記録をまとめて見られます。</p></div>
+          <div class="feature-card"><div class="feature-icon">📷</div><h3>クイック・ショット</h3><p>起動したら1タップでカメラへ。飲み始めの景色やラベルを、自分だけの記憶として残せます。</p></div>
+          <div class="feature-card"><div class="feature-icon">♡</div><h3>お気に入り保存</h3><p>気に入った一杯にハートを付けて、あとからスライドショーでゆっくり振り返れます。</p></div>
+          <div class="feature-card"><div class="feature-icon">👥</div><h3>酒場メモ</h3><p>お店ごとのメモや人数、会話の内容などを保存。飲んだ場所の思い出も整理できます。</p></div>
+          <div class="feature-card"><div class="feature-icon">🔔</div><h3>セーフティ通知</h3><p>1日・1週間の飲みすぎ防止、体調チェック、和らぎ水リマインダーで安心感をプラス。</p></div>
+        </div>
+      </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">主な機能</h2>
-            <div class="grid">
-                <div class="card">
-                    <div class="card-icon">🍺</div>
-                    <h3>飲酒記録</h3>
-                    <p>ビール、ハイボール、日本酒、焼酎、ワインなど、多様な種類のお酒を記録可能です。</p>
-                    <ul>
-                        <li>容量（ml）や単位の選択</li>
-                        <li>簡単なタップ操作</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <div class="card-icon">📅</div>
-                    <h3>カレンダー表示</h3>
-                    <p>日々の記録をカレンダーで管理。履歴を一目で確認できます。</p>
-                    <ul>
-                        <li>月ごとの飲酒状況</li>
-                        <li>日別の詳細な履歴</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <div class="card-icon">⚠️</div>
-                    <h3>飲み過ぎ防止アラート</h3>
-                    <p>設定した目標に基づき、健康的な飲酒をサポートします。</p>
-                    <ul>
-                        <li>1日の飲酒量目標の設定</li>
-                        <li>目標達成時のアラート</li>
-                        <li>Daily/Exceeded Safety Rules</li>
-                    </ul>
-                </div>
-            </div>
+    <section id="howto">
+      <div class="container">
+        <div class="section-head">
+          <h2>使い方はシンプル。</h2>
+          <p>飲んだら記録して、あとで振り返るだけ。3ステップで続けられます。</p>
         </div>
+        <div class="how-grid">
+          <div class="step-card"><h3>お酒を選ぶ</h3><p>カテゴリーから飲んだお酒をタップ。量・日付・時刻を確認して記録します。</p></div>
+          <div class="step-card"><h3>カレンダーで見る</h3><p>その日の合計量や飲んだ内容を確認。月ごとのリズムも自然に把握できます。</p></div>
+          <div class="step-card"><h3>写真やメモを残す</h3><p>お気に入りの一杯や酒場の思い出も保存。飲酒記録が自分だけのログになります。</p></div>
+        </div>
+      </div>
     </section>
 
-    <!-- Marketing / Usage Flow -->
-    <section class="marketing">
-        <div class="container">
-            <h2>使用方法</h2>
-            <div class="steps">
-                <div class="step-item">
-                    <div class="step-number">01</div>
-                    <div class="step-title">目標設定</div>
-                    <div class="step-desc">Settingsタブから1日の飲酒許容量を設定し、通知をONにします。</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-number">02</div>
-                    <div class="step-title">記録する</div>
-                    <div class="step-desc">Recordタブからお酒の種類と量を選んでタップするだけ。</div>
-                </div>
-                <div class="step-item">
-                    <div class="step-number">03</div>
-                    <div class="step-title">振り返る</div>
-                    <div class="step-desc">Calendarタブで過去の記録を確認し、傾向を把握します。</div>
-                </div>
-            </div>
+    <section>
+      <div class="container">
+        <div class="cta-box">
+          <h2>飲んだ記憶を、<br />きれいに残そう。</h2>
+          <p>アルコエイドで、飲酒量・写真・酒場メモ・セーフティ通知をひとつに。毎日の記録を無理なく続けられます。</p>
+          <div class="hero-actions">
+            <a class="appstore" href="https://apps.apple.com/jp/app/%E3%82%A2%E3%83%AB%E3%82%B3%E3%82%A8%E3%82%A4%E3%83%89-%E9%A3%B2%E9%85%92%E8%A8%98%E9%8C%B2%E3%81%A7%E9%A3%B2%E3%81%BF%E9%81%8E%E3%81%8E%E9%98%B2%E6%AD%A2/id6759056143">
+              <span class="apple"></span>
+              <span><small>Download on the</small><b>App Store</b></span>
+            </a>
+          </div>
         </div>
+      </div>
     </section>
+  </main>
 
-    <!-- Disclaimer Section -->
-    <section class="disclaimer">
-        <div class="container">
-            <h3>注意事項</h3>
-            <br>
-            <ul>
-                <li>本アプリは健康管理をサポートするためのものですが、医学的なアドバイスを提供するものではありません。</li>
-                <li>飲酒に関する判断は、ご自身の体調や医師の指示に従ってください。</li>
-                <li>本アプリの利用には <strong>iOS 17以上</strong> が必要です。</li>
-                <li>多言語対応（日本語・英語）、ダークモード対応。</li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Alco Aide. All rights reserved.</p>
-        </div>
-    </footer>
-
+  <footer>
+    <div class="container footer-inner">
+      <span>© 2026 アルコエイド</span>
+      <span>飲酒は20歳になってから。体調や医師の指示に従ってご利用ください。</span>
+    </div>
+  </footer>
 </body>
-
 </html>
