@@ -31,9 +31,17 @@
         radial-gradient(circle at 8% 18%, rgba(255,255,255,.92), transparent 28rem),
         linear-gradient(180deg, #f7f8fb 0%, var(--app-bg) 48%, #f7f8fb 100%);
       overflow-x: hidden;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     a { color: inherit; text-decoration: none; }
+    img {
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: none;
+    }
     .container { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
 
     .nav {
@@ -251,5 +259,17 @@
       <span>飲酒は20歳になってから。体調や医師の指示に従ってご利用ください。</span>
     </div>
   </footer>
+  <script>
+    document.addEventListener("copy", event => event.preventDefault());
+    document.addEventListener("cut", event => event.preventDefault());
+    document.addEventListener("contextmenu", event => event.preventDefault());
+    document.addEventListener("dragstart", event => event.preventDefault());
+    document.addEventListener("keydown", event => {
+      const key = event.key.toLowerCase();
+      if ((event.metaKey || event.ctrlKey) && ["a", "c", "x", "s", "u"].includes(key)) {
+        event.preventDefault();
+      }
+    });
+  </script>
 </body>
 </html>
