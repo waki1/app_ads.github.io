@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlaceDiary - その場所の空気を、静かに残す</title>
+  <meta name="description" content="PlaceDiaryは、場所にまつわる温度や余白を静かに残すためのiPhoneアプリです。現在リリース準備中。" />
+  <meta name="robots" content="noai, noimageai" />
+  <meta property="og:title" content="PlaceDiary - その場所の空気を、静かに残す" />
+  <meta property="og:description" content="地図でもアルバムでもなく、場所の記憶をやわらかく綴るための世界観を紹介しています。" />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#3f5e52" />
+  <style>
+    :root {
+      --mist: #f3f6f2;
+      --fog: #e8efe6;
+      --card: #f8fbf7;
+      --card-deep: #edf4ec;
+      --ink: #2b3a35;
+      --muted: #64716c;
+      --fern: #3f5e52;
+      --fern-soft: #6f8d82;
+      --moss: #8ca98f;
+      --line: #c7d5ca;
+      --sun: #dcccae;
+      --night: #2b3532;
+      --white: #ffffff;
+      --radius: 22px;
+      --radius-lg: 34px;
+      --shadow: 0 24px 74px rgba(42, 65, 56, 0.14);
+      --shadow-soft: 0 14px 36px rgba(42, 65, 56, 0.11);
+      --max: 1120px;
+      --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+      --font-title: "Avenir Next", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--font-body);
+      line-height: 1.76;
+      background:
+        radial-gradient(circle at 10% 8%, rgba(140,169,143,.25), transparent 24rem),
+        radial-gradient(circle at 90% 10%, rgba(220,204,174,.24), transparent 24rem),
+        linear-gradient(180deg, #f9fcf8 0%, var(--mist) 45%, #fbfdfb 100%);
+      overflow-x: hidden;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: .22;
+      background-image:
+        radial-gradient(circle, rgba(63,94,82,.2) 0 1px, transparent 1.2px),
+        radial-gradient(circle, rgba(111,141,130,.18) 0 1px, transparent 1.2px);
+      background-size: 30px 30px, 44px 44px;
+      background-position: 0 0, 13px 21px;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img {
+      display: block;
+      max-width: 100%;
+      -webkit-user-drag: none;
+      user-drag: none;
+      pointer-events: none;
+    }
+
+    .wrap {
+      width: min(var(--max), calc(100% - clamp(28px, 5vw, 56px)));
+      margin: 0 auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(199, 213, 202, .72);
+      background: rgba(248, 251, 247, .82);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-inner {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: -.02em;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      border: 1px solid rgba(199, 213, 202, .9);
+      background:
+        linear-gradient(135deg, rgba(248,251,247,.95), rgba(232,239,230,.95)),
+        var(--card);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 9px;
+      border: 1.8px solid var(--fern);
+      opacity: .9;
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      top: 11px;
+      width: 13px;
+      height: 18px;
+      border-left: 2px solid var(--fern);
+      border-right: 2px solid var(--fern);
+      border-bottom: 2px solid var(--fern);
+      border-radius: 0 0 10px 10px;
+      opacity: .85;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .nav-links a:hover { color: var(--ink); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 46px;
+      padding: 12px 20px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-weight: 900;
+      letter-spacing: -.02em;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      color: #f8fbf7;
+      background: var(--fern);
+      box-shadow: 0 14px 32px rgba(63, 94, 82, .24);
+    }
+
+    .btn-secondary {
+      color: var(--ink);
+      background: rgba(255, 255, 255, .64);
+      border-color: rgba(199, 213, 202, .95);
+    }
+
+    .hero { padding: 82px 0 76px; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.03fr) minmax(320px, .97fr);
+      align-items: center;
+      gap: clamp(34px, 5vw, 58px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(199, 213, 202, .84);
+      color: var(--fern);
+      background: rgba(248, 251, 247, .86);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    h1 {
+      margin: 24px 0 18px;
+      font-family: var(--font-title);
+      font-size: clamp(46px, 7vw, 80px);
+      line-height: 1.02;
+      letter-spacing: -.05em;
+      font-weight: 680;
+    }
+
+    h1 span { color: var(--fern-soft); }
+
+    .lead {
+      max-width: 640px;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(17px, 2vw, 20px);
+      font-weight: 700;
+      line-height: 1.9;
+      letter-spacing: -.01em;
+    }
+
+    .hero-actions {
+      margin-top: 34px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .note {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .note span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .phone-stage {
+      position: relative;
+      min-height: clamp(560px, 58vw, 660px);
+      display: grid;
+      place-items: center;
+    }
+
+    .memo {
+      position: absolute;
+      z-index: 2;
+      width: 188px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(199, 213, 202, .84);
+      background: rgba(248, 251, 247, .92);
+      box-shadow: var(--shadow-soft);
+      font-size: 14px;
+      font-weight: 900;
+      transform: rotate(-4deg);
+    }
+
+    .memo small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .memo-left { left: -2%; top: 16%; }
+    .memo-right { right: -3%; bottom: 16%; transform: rotate(5deg); }
+
+    .strip {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      width: 62px;
+      height: 20px;
+      border-radius: 2px;
+      transform: translateX(-50%) rotate(2deg);
+      background: rgba(140, 169, 143, .62);
+      box-shadow: 0 3px 8px rgba(43, 58, 53, .12);
+    }
+
+    .phone {
+      position: relative;
+      width: clamp(292px, 32vw, 332px);
+      aspect-ratio: 332 / 664;
+      padding: 12px;
+      border-radius: 48px;
+      background: #1f2825;
+      box-shadow: 0 34px 86px rgba(31, 40, 37, .3);
+      transform: rotate(1.4deg);
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 38px;
+      border: 1px solid rgba(255, 255, 255, .16);
+      background:
+        radial-gradient(circle at 16% 14%, rgba(220,204,174,.34), transparent 13rem),
+        linear-gradient(180deg, #f9fcf8, var(--fog));
+    }
+
+    .island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      z-index: 2;
+      width: 94px;
+      height: 27px;
+      border-radius: 999px;
+      background: #1f2825;
+      transform: translateX(-50%);
+    }
+
+    .app-ui { padding: 58px 18px 92px; }
+
+    .app-title {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 18px;
+      font-family: var(--font-title);
+      font-size: 28px;
+      font-weight: 650;
+      letter-spacing: -.04em;
+    }
+
+    .intro-copy {
+      margin-bottom: 14px;
+      font-family: var(--font-title);
+      font-size: 22px;
+      line-height: 1.34;
+      letter-spacing: -.03em;
+    }
+
+    .intro-sub {
+      margin-bottom: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .weekly-card {
+      margin-bottom: 12px;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(199, 213, 202, .74);
+      background: rgba(248, 251, 247, .94);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .weekly-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: var(--fern);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .01em;
+    }
+
+    .spark {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      color: #f8fbf7;
+      background: var(--fern);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .weekly-copy {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+
+    .metric-strip {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr 1px 1fr;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 11px 8px;
+      border-radius: 16px;
+      border: 1px solid rgba(199, 213, 202, .8);
+      background: rgba(255, 255, 255, .56);
+    }
+
+    .metric-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(199, 213, 202, .9);
+    }
+
+    .metric-col {
+      text-align: center;
+    }
+
+    .metric-col small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .metric-col b {
+      display: block;
+      margin-top: 4px;
+      color: #7d4d3d;
+      font-family: var(--font-title);
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .mini-map {
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(199, 213, 202, .72);
+      background: rgba(248, 251, 247, .95);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .map-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .route-canvas {
+      position: relative;
+      height: 100px;
+      overflow: hidden;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 22% 18%, rgba(220,204,174,.55), transparent 10rem),
+        linear-gradient(180deg, #f6f8f5, #eef4ed);
+      border: 1px solid rgba(199, 213, 202, .72);
+    }
+
+    .route-line {
+      position: absolute;
+      border-radius: 999px;
+      background: #4f7fc7;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.62);
+    }
+
+    .route-line.one {
+      left: 18px;
+      top: 58px;
+      width: 122px;
+      height: 5px;
+      transform: rotate(-16deg);
+    }
+
+    .route-line.two {
+      left: 92px;
+      top: 34px;
+      width: 74px;
+      height: 5px;
+      transform: rotate(30deg);
+    }
+
+    .pin {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 4px 10px rgba(43, 58, 53, .2);
+    }
+
+    .pin.start {
+      left: 16px;
+      top: 66px;
+      background: #8ca98f;
+    }
+
+    .pin.mid {
+      left: 84px;
+      top: 46px;
+      background: #3f5e52;
+    }
+
+    .pin.end {
+      left: 148px;
+      top: 24px;
+      background: #c46f5d;
+    }
+
+    .tabs {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 13px;
+      min-height: 72px;
+      padding: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      border-radius: 999px;
+      background: rgba(248, 251, 247, .95);
+      box-shadow: 0 -7px 20px rgba(63, 94, 82, .13);
+    }
+
+    .tab {
+      text-align: center;
+      padding: 9px 0;
+      border-radius: 999px;
+      color: rgba(100,113,108,.8);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .tab strong {
+      display: block;
+      font-size: 17px;
+      line-height: 1.1;
+    }
+
+    .tab.active {
+      color: var(--fern);
+      background: rgba(140, 169, 143, .24);
+    }
+
+    section { padding: 78px 0; }
+
+    .section-head {
+      max-width: 760px;
+      margin: 0 auto 38px;
+      text-align: center;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-family: var(--font-title);
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1.12;
+      letter-spacing: -.05em;
+      font-weight: 650;
+    }
+
+    .section-head p {
+      margin: 16px auto 0;
+      color: var(--muted);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.86;
+    }
+
+    .cards {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    }
+
+    .card {
+      min-height: 220px;
+      padding: 26px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(199, 213, 202, .76);
+      background: rgba(248, 251, 247, .9);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .icon {
+      display: grid;
+      place-items: center;
+      width: 50px;
+      height: 50px;
+      margin-bottom: 18px;
+      border-radius: 16px;
+      color: var(--ink);
+      background: rgba(220, 204, 174, .46);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .icon.moss { background: rgba(140,169,143,.3); }
+    .icon.soft { background: rgba(232,239,230,.95); }
+
+    .card h3 {
+      margin: 0 0 9px;
+      font-size: 21px;
+      line-height: 1.34;
+      letter-spacing: -.03em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.8;
+    }
+
+    .journey {
+      background:
+        linear-gradient(180deg, rgba(248, 251, 247, .25), rgba(237, 244, 236, .56)),
+        linear-gradient(90deg, rgba(140,169,143,.12), rgba(220,204,174,.14));
+    }
+
+    .journey-grid {
+      display: grid;
+      grid-template-columns: .95fr 1.05fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .panel {
+      position: relative;
+      padding: 34px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(199, 213, 202, .8);
+      background: rgba(248, 251, 247, .94);
+      box-shadow: var(--shadow);
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 42px;
+      width: 92px;
+      height: 24px;
+      border-radius: 2px;
+      background: rgba(140, 169, 143, .58);
+      transform: rotate(-3deg);
+    }
+
+    .panel h2 {
+      margin: 0 0 14px;
+      font-family: var(--font-title);
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1.16;
+      letter-spacing: -.05em;
+    }
+
+    .panel p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .steps {
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 54px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(199, 213, 202, .75);
+      background: rgba(255, 255, 255, .5);
+    }
+
+    .step-num {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      color: #f8fbf7;
+      background: var(--fern);
+      font-family: var(--font-title);
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .step h3 {
+      margin: 0 0 4px;
+      font-size: 19px;
+      letter-spacing: -.03em;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .voices {
+      display: grid;
+      grid-template-columns: 1.03fr .97fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .story-window {
+      position: relative;
+      overflow: hidden;
+      min-height: 420px;
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(199, 213, 202, .7);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(220,204,174,.26), transparent 18rem),
+        linear-gradient(180deg, #f6f9f5, #edf4ec);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .story-window::after {
+      content: "";
+      position: absolute;
+      inset: auto -44px -54px auto;
+      width: 190px;
+      height: 190px;
+      border-radius: 50%;
+      background: rgba(63, 94, 82, .14);
+    }
+
+    .story-sheet {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      padding: 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(199, 213, 202, .76);
+      background: rgba(255, 255, 255, .65);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .story-label {
+      margin: 0 0 8px;
+      color: var(--fern);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .story-sheet h3 {
+      margin: 0 0 6px;
+      font-family: var(--font-title);
+      font-size: 30px;
+      line-height: 1.05;
+    }
+
+    .story-sheet p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.65;
+    }
+
+    .story-map {
+      position: relative;
+      z-index: 1;
+      height: 198px;
+      margin-top: 12px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(199, 213, 202, .72);
+      background:
+        radial-gradient(circle at 20% 22%, rgba(220,204,174,.62), transparent 9rem),
+        linear-gradient(180deg, #f2f6f0, #e8efe6);
+    }
+
+    .story-route {
+      position: absolute;
+      border-radius: 999px;
+      background: #4f7fc7;
+    }
+
+    .story-route.one {
+      left: 24px;
+      top: 108px;
+      width: 150px;
+      height: 6px;
+      transform: rotate(-20deg);
+    }
+
+    .story-route.two {
+      left: 120px;
+      top: 68px;
+      width: 90px;
+      height: 6px;
+      transform: rotate(28deg);
+    }
+
+    .story-dot {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 5px 12px rgba(43, 58, 53, .18);
+    }
+
+    .story-dot.a {
+      left: 20px;
+      top: 126px;
+      background: #8ca98f;
+    }
+
+    .story-dot.b {
+      left: 106px;
+      top: 88px;
+      background: #3f5e52;
+    }
+
+    .story-dot.c {
+      left: 192px;
+      top: 58px;
+      background: #c46f5d;
+    }
+
+    .story-tags {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .story-tag {
+      padding: 9px 8px;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px solid rgba(199, 213, 202, .74);
+      background: rgba(248, 251, 247, .92);
+    }
+
+    .story-tag small {
+      display: block;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .story-tag b {
+      display: block;
+      margin-top: 3px;
+      color: #7d4d3d;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .voice-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .voice-item {
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(199, 213, 202, .76);
+      background: rgba(248, 251, 247, .9);
+    }
+
+    .voice-item h3 {
+      margin: 0 0 6px;
+      font-size: 19px;
+      letter-spacing: -.03em;
+    }
+
+    .voice-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .release {
+      padding: 44px;
+      border-radius: 36px;
+      border: 1px solid rgba(199, 213, 202, .78);
+      background:
+        linear-gradient(135deg, rgba(140,169,143,.2), rgba(220,204,174,.24)),
+        rgba(248, 251, 247, .9);
+      box-shadow: var(--shadow);
+    }
+
+    .release-grid {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .release h2 {
+      margin: 0;
+      font-family: var(--font-title);
+      font-size: clamp(30px, 4vw, 46px);
+      line-height: 1.16;
+      letter-spacing: -.05em;
+    }
+
+    .release p {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .release-points {
+      display: grid;
+      gap: 12px;
+    }
+
+    .release-point {
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(199, 213, 202, .75);
+      background: rgba(255, 255, 255, .44);
+      font-weight: 800;
+    }
+
+    .cta { padding-bottom: 94px; }
+
+    .cta-box {
+      position: relative;
+      overflow: hidden;
+      padding: 58px 34px;
+      border-radius: 40px;
+      color: #f4f8f4;
+      text-align: center;
+      background:
+        radial-gradient(circle at 86% 16%, rgba(220,204,174,.35), transparent 18rem),
+        linear-gradient(135deg, #2b3532, #3f5e52 56%, #6f8d82);
+      box-shadow: 0 30px 90px rgba(43, 58, 53, .24);
+    }
+
+    .cta-box h2 {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      font-family: var(--font-title);
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.1;
+      letter-spacing: -.05em;
+    }
+
+    .cta-box p {
+      position: relative;
+      z-index: 1;
+      max-width: 690px;
+      margin: 18px auto 28px;
+      color: rgba(244, 248, 244, .8);
+      font-weight: 700;
+    }
+
+    .cta-box .hero-actions {
+      position: relative;
+      z-index: 1;
+      margin-top: 0;
+      justify-content: center;
+    }
+
+    .btn-disabled {
+      color: rgba(248, 251, 247, .94);
+      background: linear-gradient(135deg, #3f5e52, #6f8d82);
+      cursor: default;
+    }
+
+    footer {
+      padding: 28px 0 44px;
+      border-top: 1px solid rgba(199, 213, 202, .72);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 940px) {
+      .hero-grid,
+      .journey-grid,
+      .voices,
+      .release-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero { padding-top: 56px; }
+      .hero-grid > div:first-child {
+        max-width: 720px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      .lead { margin: 0 auto; }
+      .eyebrow,
+      .hero-actions,
+      .note {
+        justify-content: center;
+      }
+      .phone-stage {
+        min-height: 600px;
+        max-width: 620px;
+        margin: 0 auto;
+      }
+      .memo-left { left: 4%; }
+      .memo-right { right: 3%; }
+      .nav-links a:not(.btn) { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .nav-inner { height: 66px; }
+      .brand span { display: none; }
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+      }
+      .nav-links .btn {
+        min-height: 42px;
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+      .hero { padding: 42px 0 48px; }
+      h1 { font-size: clamp(40px, 12vw, 48px); }
+      .lead {
+        margin: 0;
+        font-size: 16px;
+      }
+      .hero-grid > div:first-child { text-align: left; }
+      .eyebrow,
+      .hero-actions,
+      .note {
+        justify-content: flex-start;
+      }
+      .hero-actions .btn {
+        width: 100%;
+        white-space: normal;
+        text-align: center;
+      }
+      .card { min-height: auto; }
+      .phone {
+        width: min(306px, 88vw);
+        border-radius: 42px;
+        padding: 10px;
+      }
+      .screen { border-radius: 33px; }
+      .phone-stage { min-height: 570px; }
+      .memo { display: none; }
+      .app-ui { padding: 54px 15px 86px; }
+      .app-title { font-size: 25px; }
+      .intro-copy { font-size: 21px; }
+      .metric-strip { margin-bottom: 10px; }
+      .weekly-card { margin-bottom: 10px; }
+      .route-canvas { height: 92px; }
+      .tabs {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        grid-template-columns: repeat(3, 1fr);
+        min-height: 68px;
+        padding: 7px;
+      }
+      section { padding: 58px 0; }
+      .section-head {
+        text-align: left;
+        margin-bottom: 28px;
+      }
+      .section-head h2 { font-size: clamp(31px, 10vw, 40px); }
+      .section-head p { font-size: 15px; }
+      .panel,
+      .release,
+      .cta-box {
+        padding: 30px 22px;
+        border-radius: 28px;
+      }
+      .step {
+        grid-template-columns: 44px 1fr;
+        padding: 16px;
+      }
+      .step-num {
+        width: 44px;
+        height: 44px;
+        font-size: 19px;
+      }
+      .story-window {
+        min-height: 380px;
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .nav-inner { gap: 12px; }
+      .phone {
+        width: min(286px, 88vw);
+        transform: none;
+      }
+      .phone-stage { min-height: 535px; }
+      .metric-col b { font-size: 17px; }
+      .metric-col small { font-size: 9px; }
+      .tab { font-size: 9px; }
+      .step {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .step-num {
+        width: 38px;
+        height: 38px;
+        font-size: 17px;
+      }
+      .story-map { height: 154px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="PlaceDiary トップへ">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>PlaceDiary</span>
+      </a>
+      <nav class="nav-links" aria-label="ページ内ナビゲーション">
+        <a href="#world">世界観</a>
+        <a href="#journey">余白</a>
+        <a href="#voice">記憶</a>
+        <a class="btn btn-primary" href="#release">リリース準備中</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">場所の記憶を、静かに綴る</div>
+          <h1>その場所の空気を、<br><span>静かに残す。</span></h1>
+          <p class="lead">
+            PlaceDiaryは、訪れた場所の情報ではなく、そこで感じた温度や気配を残すためのアプリです。写真や地図の外側にある、言葉になりきらない記憶をそっと置いておける場所を目指しています。
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#world">世界観を見る</a>
+            <a class="btn btn-secondary" href="#release">公開予定について</a>
+          </div>
+          <div class="note">
+            <span>✓ 場所を評価するより、感じたことを大切に</span>
+            <span>✓ 早く消費しない、記憶のペース</span>
+            <span>✓ あとから読み返したくなる静けさ</span>
+          </div>
+        </div>
+
+        <div class="phone-stage" aria-hidden="true">
+          <div class="memo memo-left">
+            <span class="strip"></span>
+            街角のひかり
+            <small>夕方の匂いと、足音のリズム</small>
+          </div>
+          <div class="memo memo-right">
+            <span class="strip"></span>
+            小さな寄り道
+            <small>名前より先に覚えている空気</small>
+          </div>
+
+          <div class="phone">
+            <div class="screen">
+              <div class="island"></div>
+              <div class="app-ui">
+                <div class="app-title">Place Diary</div>
+                <div class="intro-copy">今週のひろがり</div>
+                <div class="intro-sub">あなたの1週間のあしあと</div>
+                <div class="weekly-card">
+                  <div class="weekly-head">
+                    <span class="spark">✦</span>
+                    <span>この日の物語</span>
+                  </div>
+                  <p class="weekly-copy">18:12から20:03まで、3.8kmの移動を12件の足あとで残しています。</p>
+                </div>
+                <div class="metric-strip">
+                  <div class="metric-col"><small>足あと</small><b>12</b></div>
+                  <span class="metric-divider"></span>
+                  <div class="metric-col"><small>距離</small><b>3.8km</b></div>
+                  <span class="metric-divider"></span>
+                  <div class="metric-col"><small>街</small><b>4</b></div>
+                </div>
+                <div class="mini-map">
+                  <div class="map-head">
+                    <span>地図</span>
+                    <span>今日</span>
+                  </div>
+                  <div class="route-canvas">
+                    <span class="route-line one"></span>
+                    <span class="route-line two"></span>
+                    <span class="pin start"></span>
+                    <span class="pin mid"></span>
+                    <span class="pin end"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="tabs">
+                <div class="tab active"><strong>⌂</strong>今日</div>
+                <div class="tab"><strong>▦</strong>地図</div>
+                <div class="tab"><strong>⚙</strong>設定</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="world">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>場所は、座標よりも記憶で残る。</h2>
+          <p>同じ通りでも、晴れた日と雨上がりではまったく違う場所になる。PlaceDiaryは、説明しきれないその差を、静かなトーンで残すことを大切にしています。</p>
+        </div>
+        <div class="cards">
+          <article class="card">
+            <div class="icon">◌</div>
+            <h3>場所の温度を残す</h3>
+            <p>有名かどうかより、そのとき自分がどう感じたか。場所にまつわる小さな感覚を中心に据えた世界観です。</p>
+          </article>
+          <article class="card">
+            <div class="icon moss">☲</div>
+            <h3>記録に余白を残す</h3>
+            <p>言葉が少ない日も、まとまっていない気持ちの日も、そのままで置いておける余白を前提に設計しています。</p>
+          </article>
+          <article class="card">
+            <div class="icon soft">⟡</div>
+            <h3>あとで開きたくなる静けさ</h3>
+            <p>すぐに見せるためではなく、時間が経ってから自分に返ってくる体験をつくることを目標にしています。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="journey" class="journey">
+      <div class="wrap journey-grid">
+        <div class="panel">
+          <h2>集めるより、ほどく。</h2>
+          <p>PlaceDiaryが目指すのは、情報を増やし続けることではありません。訪れた場所で受け取った感情を、あとでゆっくりほどけるように残すことです。</p>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div>
+              <h3>通り過ぎる前の気配</h3>
+              <p>目的地に着くまでの道、視界の端に残った色、ふと立ち止まった理由。そこからすでに記憶は始まっています。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div>
+              <h3>その場にいるときの温度</h3>
+              <p>光の角度、空気の重さ、会話の間。名前をつけにくい印象ほど、時間が経ってから価値を持つと考えています。</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div>
+              <h3>あとで思い出すための余韻</h3>
+              <p>数日後や季節が変わったあとに開いたとき、場所そのものより先に気持ちが戻ってくる。そんな残り方を目指します。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="voice">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>誰かの正解ではなく、自分の記憶の形で。</h2>
+          <p>PlaceDiaryは、比較のための記録ではなく、その人自身の輪郭を残すための場として構想しています。目立つことよりも、長く寄り添えることを優先します。</p>
+        </div>
+        <div class="voices">
+          <div class="story-window" aria-hidden="true">
+            <div class="story-sheet">
+              <p class="story-label">Day Story</p>
+              <h3>この日の物語</h3>
+              <p>17:42から20:10まで、4.1kmの移動を15件の足あとで残した日。</p>
+            </div>
+            <div class="story-map">
+              <span class="story-route one"></span>
+              <span class="story-route two"></span>
+              <span class="story-dot a"></span>
+              <span class="story-dot b"></span>
+              <span class="story-dot c"></span>
+            </div>
+            <div class="story-tags">
+              <div class="story-tag"><small>足あと</small><b>15件</b></div>
+              <div class="story-tag"><small>距離</small><b>4.1km</b></div>
+              <div class="story-tag"><small>時間</small><b>2h28m</b></div>
+            </div>
+          </div>
+          <div class="voice-list">
+            <article class="voice-item">
+              <h3>場所の解像度は、人それぞれ</h3>
+              <p>同じ場所でも、見える景色や記憶の焦点は違います。PlaceDiaryはその違いを揃えず、尊重する方向で考えています。</p>
+            </article>
+            <article class="voice-item">
+              <h3>大きな出来事だけが記録ではない</h3>
+              <p>遠出や旅行だけでなく、日常の短い寄り道にも意味があります。何気ない一瞬を残す感覚を大切にします。</p>
+            </article>
+            <article class="voice-item">
+              <h3>読み返すほどに意味が育つ</h3>
+              <p>その日には気づかなかった感情が、あとで見えてくる。時間とともに記憶が育つ余地を残すことを目指します。</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="release">
+      <div class="wrap">
+        <div class="release">
+          <div class="release-grid">
+            <div>
+              <h2>現在、リリース準備中です。</h2>
+              <p>PlaceDiaryは、世界観と体験の細部を磨きながら公開準備を進めています。ここでは先行して、アプリが大切にしたい思想と空気感をお届けしています。</p>
+            </div>
+            <div class="release-points">
+              <div class="release-point">場所の情報より、場所で感じたことを中心にする</div>
+              <div class="release-point">短い言葉でも残せる、静かな記録体験を目指す</div>
+              <div class="release-point">時間が経ってから読み返せる余白を守る</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="wrap">
+        <div class="cta-box">
+          <h2>場所の記憶は、<br>もっと静かでいい。</h2>
+          <p>PlaceDiaryは、情報を競うためではなく、自分の感覚をていねいに残すためのアプリとして準備を進めています。公開まで、もうしばらくお待ちください。</p>
+          <div class="hero-actions">
+            <span class="btn btn-disabled">App Store 公開準備中</span>
+            <a class="btn btn-secondary" href="#top">トップへ戻る</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot">
+      <span>© 2026 PlaceDiary</span>
+      <span>場所の空気を、静かに残すiPhoneアプリ。</span>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("copy", event => event.preventDefault());
+    document.addEventListener("cut", event => event.preventDefault());
+    document.addEventListener("contextmenu", event => event.preventDefault());
+    document.addEventListener("dragstart", event => event.preventDefault());
+    document.addEventListener("keydown", event => {
+      const key = event.key.toLowerCase();
+      if ((event.metaKey || event.ctrlKey) && ["a", "c", "x", "s", "u"].includes(key)) {
+        event.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>
